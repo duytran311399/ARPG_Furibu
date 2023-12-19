@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 37ada819eeafd3f41852216f8dad67f6
+guid: 91c995a8b7b3e9e47acdca1777b69045
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
@@ -7,13 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: "\u4E8C\u91CD"
-    second: {fileID: 2100000, guid: 9237e16cd3c982649a7d17e91655ee15, type: 2}
+      name: Equip_Sword_Regalis_Eff02_Mat
+    second: {fileID: 2100000, guid: da8765d3b94606d4eaf7809a2cc43199, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Equip_Sword_Regalis_Eff_Mat.002
+    second: {fileID: 2100000, guid: 9b75f2579633e4141bd35752bd0dbd26, type: 2}
   materials:
-    materialImportMode: 1
-    materialName: 1
+    materialImportMode: 2
+    materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -40,7 +45,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 0.08
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -93,7 +98,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
+    globalScale: 0.08
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
