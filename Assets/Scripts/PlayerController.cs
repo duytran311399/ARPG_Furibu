@@ -10,9 +10,10 @@ public class PlayerController : MonoBehaviour
     private int _animIDAttackCombo;
     private int _animIDIsAttacking;
     private int _animIDHoldHeavy;
-    private int _animIDHoldAttack;
+    private int _animIDIsHoldAttack;
     private int _animIDAttackAir;
     private int _animIDAttackHeavy;
+    private int _animIDJump;
 
     bool hasAnimator;
 
@@ -22,13 +23,13 @@ public class PlayerController : MonoBehaviour
     float attackStart = 0;
     float delaycombo = 0.3f;
     float durationAttack = 1f;
-    float timeHoldAttackHeavy = 0.5f;
+    float timeHoldAttackHeavy = 0;
 
     int maxCombo = 4;
     public static bool isAttacking = false;
     public static bool isAttacAir = false;
     public static bool isAttacHeavy = false;
-    bool holdAttack;
+    bool isHoldAttack;
 
     bool IsBaseAttack { get { return _animator.GetCurrentAnimatorStateInfo(0).IsName(StringConfig.rig_Attack_Combo1) ||
                 _animator.GetCurrentAnimatorStateInfo(0).IsName(StringConfig.rig_Attack_Combo2) ||
@@ -39,14 +40,17 @@ public class PlayerController : MonoBehaviour
         personController = GetComponent<ThirdPersonController>();
         hasAnimator = TryGetComponent(out _animator);
         _input = GetComponent<StarterAssetsInputs>();
-
-
+        AssignAnimationIDs();
+    }
+    void AssignAnimationIDs()
+    {
         _animIDAttackCombo = Animator.StringToHash("AttackCombo");
         _animIDIsAttacking = Animator.StringToHash("IsAttacking");
         _animIDHoldHeavy = Animator.StringToHash("HoldHeavy");
-        _animIDHoldAttack = Animator.StringToHash("HoldAttack");
+        _animIDIsHoldAttack = Animator.StringToHash("IsHoldAttack");
         _animIDAttackAir = Animator.StringToHash("AttackAir");
         _animIDAttackHeavy = Animator.StringToHash("AttackHeavy");
+        _animIDJump = Animator.StringToHash("Jump");
     }
     private void Update()
     {
@@ -55,15 +59,26 @@ public class PlayerController : MonoBehaviour
     }
     void ResetAttackCombo()
     {
-        if (isAttacking)
+        if(indexCombo == 4)
+        {
+            ResetCombo();
+            return;
+        }
+        if (isAttacking && indexCombo <=3)
         {
             if (Time.time - attackStart > durationAttack)
             {
                 ResetCombo();
             }
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift) || _animator.GetCurrentAnimatorStateInfo(0).IsName("rig_Idle2") || indexCombo > maxCombo)
+        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("rig_Idle2") || indexCombo > maxCombo)
         {
+            if (indexCombo != 0)
+                ResetCombo();
+        }
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            _animator.SetTrigger("Evade");
             if (indexCombo != 0)
                 ResetCombo();
         }
@@ -91,14 +106,15 @@ public class PlayerController : MonoBehaviour
                     {
                         indexCombo = 4;
                     }
-                    //else if (_animator.GetCurrentAnimatorStateInfo(0).IsName(StringConfig.rig_Attack_Combo4))
-                    //{
-                    //    indexCombo = 5;
-                    //}
+                    else if (_animator.GetCurrentAnimatorStateInfo(0).IsName(StringConfig.rig_Attack_Combo4))
+                    {
+                        indexCombo = 4;
+                    }
                     if (hasAnimator)
                     {
                         _animator.SetInteger(_animIDAttackCombo, indexCombo);
                         _animator.SetBool(_animIDIsAttacking, isAttacking);
+                        _animator.SetBool(_animIDJump, !personController.Grounded);
                     }
                 }
             }
@@ -108,24 +124,27 @@ public class PlayerController : MonoBehaviour
                 personController.GetComponent<Rigidbody>().isKinematic = true;
                 Invoke("ResetGravity", 1f);
             }
+            ////////////////// Heave Attack ///////////////////////
+            if (isHoldAttack && _animator.GetCurrentAnimatorStateInfo(0).IsName(StringConfig.rig_Attack_Heavy1))
+            {
+                CancelInvoke("ResetHeavy");
+                indexHeavy = 1;
+                _animator.SetInteger(_animIDAttackHeavy, indexHeavy);
+                ResetHeavy();
+            }
         }
         if (Input.GetMouseButton(0))
         {
             timeHoldAttackHeavy += Time.deltaTime;
             _animator.SetFloat(_animIDHoldHeavy, timeHoldAttackHeavy);
-            if (attackStart + 0.5f <= Time.time)
+            if (attackStart + 0.5f <= Time.time && !isHoldAttack)
             {
-                holdAttack = true;
-                _animator.SetBool(_animIDHoldAttack, holdAttack);
-            }
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
-            if (holdAttack == true)
-            {
+                indexHeavy = 0;
                 timeHoldAttackHeavy = 0;
-                holdAttack = false;
-                _animator.SetBool(_animIDHoldAttack, holdAttack);
+                isHoldAttack = true;
+                _animator.SetBool(_animIDIsHoldAttack, isHoldAttack);
+                _animator.SetInteger(_animIDAttackHeavy, indexHeavy);
+                Invoke("ResetHeavy", durationAttack);
             }
         }
     }
@@ -135,12 +154,15 @@ public class PlayerController : MonoBehaviour
         isAttacking = false;
         _animator.SetInteger(_animIDAttackCombo, indexCombo);
         _animator.SetBool(_animIDIsAttacking, isAttacking);
-        Debug.LogError("ResetCombo");
+        _animator.SetBool(_animIDJump, !personController.Grounded);
     }
     public void ResetHeavy()
     {
         indexHeavy = 0;
-        holdAttack = false;
+        isHoldAttack = false;
+        timeHoldAttackHeavy = 0;
+        _animator.SetBool(_animIDIsHoldAttack, isHoldAttack);
+        _animator.SetBool(_animIDJump, !personController.Grounded);
     }
     public void ResetGravity()
     {
