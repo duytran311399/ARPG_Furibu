@@ -2,75 +2,96 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 using StarterAssets;
 
 public class PlayerCombat : MonoBehaviour
 {
     private ThirdPersonController personController;
+    private StarterAssetsInputs _input;
     public Weapon sword;
     public Transform weaponEquipmentHolder;
     public Transform weaponUnEquipHolder;
-    public List<AttackSO> combos;
-    StateAttack stateAttack;
-    [SerializeField] float lastClickedTime;
-    [SerializeField] float lastComboEnd;
-    [SerializeField] int comboCounter;
+   
+    [Header("Attack Combo")][Space(5)]
+    [SerializeField] static StateCombo stateCombo;
+    public List<AttackSO> normalCombos;
+    public List<AttackSO> airCombos;
+    float lastClickedTime;
+    float lastComboEnd;
+    int comboCounter;
+    [SerializeField] float attackDuration = 0.4f;
+    [SerializeField] float durationEndCombo = 0.9f;
     Animator anim;
+
+    public static bool isAttacking { get { return stateCombo == StateCombo.Attack ? true : false; } }
+    public static bool isCanMove { get { return stateCombo == StateCombo.Ready ? true : false; } }
+
     private int attackNorAID;
+    private int sprintAID;
 
     private void Start()
     {
         personController = GetComponent<ThirdPersonController>();
+        _input = GetComponent<StarterAssetsInputs>();
         anim = GetComponent<Animator>();
         attackNorAID = Animator.StringToHash("Attack");
     }
     private void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (_input.attack)
         {
             AttackNormal();
+            _input.attack = false;
         }
-        ExitAttackNormal();
+        else
+            ExitAttackNormal();
+        Debug.LogWarning(stateCombo.ToString());
     }
     void AttackNormal()
     {
+        if (stateCombo == StateCombo.EndAttack)
+            return;
         float currentState = 0;
         if (anim.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
             currentState = anim.GetCurrentAnimatorClipInfo(0)[0].clip.length;
-        if (Time.time - lastComboEnd > 0.5f && comboCounter < combos.Count)
+        if (Time.time - lastComboEnd > attackDuration && comboCounter < normalCombos.Count)
         {
             CancelInvoke(nameof(EndCombo));
-            if (Time.time - lastClickedTime >= currentState * 0.4f)
+            if (Time.time - lastClickedTime >= currentState * attackDuration)
             {
-                SetSwordCombat();
-                anim.runtimeAnimatorController = combos[comboCounter].animatorOV;
+                anim.runtimeAnimatorController = normalCombos[comboCounter].animatorOV;
                 anim.Play(attackNorAID, 0, 0);
-                ChangeStateAttack(StateAttack.Attack);
+                if (comboCounter == 0)
+                    OnChangeStateCombo(StateCombo.StartAttack);
+                OnChangeStateCombo(StateCombo.Attack);
                 comboCounter++;
                 lastClickedTime = Time.time;
-                if(comboCounter >= combos.Count)
+                if(comboCounter >= normalCombos.Count)
                 {
-                    Invoke(nameof(EndCombo), currentState * 0.95f);
+                    Invoke(nameof(EndCombo), currentState * durationEndCombo);
+                    OnChangeStateCombo(StateCombo.EndAttack);
                 }
+                //Debug.LogError(comboCounter);
             }
         } 
     }
     void ExitAttackNormal()
     {
-        if(stateAttack == StateAttack.Attack)
-        if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.9f && anim.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+        if(stateCombo == StateCombo.Attack)
+        if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > durationEndCombo && anim.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
             EndCombo();
-            ChangeStateAttack(StateAttack.EndAttack);
-            Debug.Log("ExitAttackNormal");
-            Invoke(nameof(SetSwordExitAttack), 0.2f);
+            lastComboEnd = Time.time - attackDuration;
+            Debug.LogWarning("ExitAttackNormal");
         }
     }
     void EndCombo()
     {
         comboCounter = 0;
         lastComboEnd = Time.time;
-        Debug.LogError("EndCombo");
+        Debug.LogWarning("EndCombo");
+        OnChangeStateCombo(StateCombo.ResetAttack);
     }
     void SetSwordExitAttack()
     {
@@ -85,12 +106,28 @@ public class PlayerCombat : MonoBehaviour
         sword.transform.localPosition = Vector3.zero;
         sword.transform.localRotation = Quaternion.identity;
     }
-    void ChangeStateAttack(StateAttack stateChange)
+    void OnChangeStateCombo(StateCombo stateChange)
     {
-        stateAttack = stateChange;
+        switch (stateChange)
+        {
+            case StateCombo.Ready:
+                break;
+            case StateCombo.StartAttack:
+                SetSwordCombat();
+                break;
+            case StateCombo.Attack:
+                break;
+            case StateCombo.EndAttack:
+                break;
+            case StateCombo.ResetAttack:
+                Timer.Schedule(this, 0.01f, ()=> stateCombo = StateCombo.Ready);
+                Invoke(nameof(SetSwordExitAttack), 5f);
+                break;
+        }
+        stateCombo = stateChange;
     }
-    enum StateAttack
+    enum StateCombo
     {
-        Ready, Start, Attack, EndAttack, ResetAttack
+        Ready, StartAttack, Attack, EndAttack, ResetAttack
     }
 }

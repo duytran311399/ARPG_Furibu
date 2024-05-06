@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 0}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -352,7 +352,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: d1a5903867c8f0a4a8a94c3fe36dad11, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3199,7 +3199,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: fd9db2fdae065d34786adb9a8f468c6b, type: 2}
+  - {fileID: 2100000, guid: 9feb6b9906952424f9a583764446db79, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3645,7 +3645,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: d76d5dba59c8a824a8170635648a356c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3715,7 +3715,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 832575517}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
@@ -63171,7 +63171,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1189047693
 Transform:
   m_ObjectHideFlags: 0
@@ -72223,7 +72223,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 5e88a93148f69984e968ecc92408960f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -112109,14 +112109,17 @@ MonoBehaviour:
   sword: {fileID: 2012224300543053453}
   weaponEquipmentHolder: {fileID: 637002852}
   weaponUnEquipHolder: {fileID: 407516309}
-  combos:
+  normalCombos:
   - {fileID: 11400000, guid: a02c2ed962fbf6847bda6f9e5e613e06, type: 2}
   - {fileID: 11400000, guid: 31268b42393839e4289e2ff4f9150b1d, type: 2}
   - {fileID: 11400000, guid: ac3362ca3ae25884fb817f1b81f42154, type: 2}
   - {fileID: 11400000, guid: 1e5260dcaaaf37a46ae6d61ae2e8823f, type: 2}
-  lastClickedTime: 0
-  lastComboEnd: 0
-  comboCounter: 0
+  airCombos:
+  - {fileID: 11400000, guid: 31268b42393839e4289e2ff4f9150b1d, type: 2}
+  - {fileID: 11400000, guid: ac3362ca3ae25884fb817f1b81f42154, type: 2}
+  - {fileID: 11400000, guid: 1e5260dcaaaf37a46ae6d61ae2e8823f, type: 2}
+  attackDuration: 0.4
+  durationEndCombo: 0.9
 --- !u!95 &5866666021233693762
 Animator:
   serializedVersion: 5

@@ -14,6 +14,7 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
+        CharacterController characterController;
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -130,6 +131,7 @@ namespace StarterAssets
             if (_mainCamera == null)
             {
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+                characterController = GetComponent<CharacterController>();
             }
         }
 
@@ -160,7 +162,6 @@ namespace StarterAssets
             JumpAndGravity();
             GroundedCheck();
             Move();
-            //AttackBehavior();
         }
 
         private void LateUpdate()
@@ -215,14 +216,20 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (_input.sprint)
             {
-                isMovetionSpeedRun = true;
+                isMovetionSpeedRun = !isMovetionSpeedRun;
+                _input.sprint = false;
             }
             // set target speed based on move speed, sprint speed and if sprint is pressed
             //float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
             float targetSpeed = isMovetionSpeedRun ? SprintSpeed : MoveSpeed;
 
+            if (_input.attack)
+            {
+                targetSpeed = MoveSpeed;
+                isMovetionSpeedRun = false;
+            }
             // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
             // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
@@ -279,7 +286,7 @@ namespace StarterAssets
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
             // move the player
-            if (PlayerController.isAttacking)
+            if (!PlayerCombat.isCanMove)
                 _speed = 0;
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
@@ -291,10 +298,9 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             }
         }
-
         private void JumpAndGravity()
         {
-            if (Grounded && !PlayerController.isAttacking)
+            if (Grounded && !PlayerCombat.isAttacking)
             {
                 // reset the fall timeout timer
                 _fallTimeoutDelta = FallTimeout;
@@ -355,9 +361,17 @@ namespace StarterAssets
             }
 
             // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
+
+            if (PlayerCombat.isAttacking)
+            {
+                characterController.enabled = false;
+                _verticalVelocity = 0;
+            }
+            else
             if (_verticalVelocity < _terminalVelocity)
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
+                characterController.enabled = true;
             }
         }
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
